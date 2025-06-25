@@ -61,15 +61,40 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y git
-        
-    - name: Checkout repository.
+
+    - name: Configure Git credentials
+      env:
+        GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+        GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
       run: |
-        git clone https://github.com/skybounds02/kubernetes-manifest.git
+        git config --global credential.helper 'store --file ~/.git-credentials'
+        echo "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com" > ~/.git-credentials
+        chmod 600 ~/.git-credentials
+
+    - name: Clone and update manifests
+      env:
+        GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+        GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+        ECR_REPO: ${{ vars.ECR_REPO }}
+      run: |
+        git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/skybounds02/kubernetes-manifest.git
         cd kubernetes-manifest
+      
+     
         git config --global user.email "philipsukonu@gmail.com"
-        git config --global user.name "Philips2005"
-        sed -i "s+${{ vars.ECR_REPO }}/bank-frontend:.*+${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}+g" ./bank-project/frontend.yaml
-        cat ./bank-project/frontend.yaml | grep -q "${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}"
-        git add bank-project/frontend.yaml
-        git commit -m "Update frontend image to version ${{ github.run_number }}"
+        git config --global user.name "philips2005"
+
+     
+        sed -i "s+${ECR_REPO}/bank-frontend:.*+${ECR_REPO}/bank-frontend:${{ github.run_number }}+g" ./bank-project/frontend.yaml
+        grep -q "${ECR_REPO}/bank-frontend:${{ github.run_number }}" ./bank-project/frontend.yaml
+
+     
+        sed -i "s+${ECR_REPO}/bank-backendapi:.*+${ECR_REPO}/bank-backendapi:${{ github.run_number }}+g" ./bank-project/backendapi.yaml
+        grep -q "${ECR_REPO}/bank-backendapi:${{ github.run_number }}" ./bank-project/backendapi.yaml
+
+     
+        git add bank-project/frontend.yaml bank-project/backendapi.yaml
+        git commit -m "Update images to version ${{ github.run_number }} (frontend and backendapi)"
         git push origin main
+        
+  
