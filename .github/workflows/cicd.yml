@@ -82,20 +82,21 @@ jobs:
           git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/skybounds02/kubernetes-manifest.git && break || sleep 5
         done
         cd kubernetes-manifest
+        
     - name: Update manifests
       env:
         ECR_REPO: ${{ vars.ECR_REPO }}
       run: |
         cd kubernetes-manifest
-      # Update frontend
+     
         sed -i "s+${ECR_REPO}/bank-frontend:.*+${ECR_REPO}/bank-frontend:${{ github.run_number }}+g" ./bank-project/frontend.yaml
         grep -q "${ECR_REPO}/bank-frontend:${{ github.run_number }}" ./bank-project/frontend.yaml
       
-      # Update backend
+     
         sed -i "s+${ECR_REPO}/bank-backendapi:.*+${ECR_REPO}/bank-backendapi:${{ github.run_number }}+g" ./bank-project/backendapi.yaml
         grep -q "${ECR_REPO}/bank-backendapi:${{ github.run_number }}" ./bank-project/backendapi.yaml
 
-      # Commit and push
+     
         git add bank-project/frontend.yaml bank-project/backendapi.yaml
         git commit -m "Update images to version ${{ github.run_number }} (frontend and backendapi)"
         git push origin main
