@@ -57,6 +57,11 @@ jobs:
     runs-on: Linux
     needs: Continues-Integration_build_and_push
     steps:
+    - name: Install Git and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git
+        
     - name: Checkout repository.
       env:
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
