@@ -75,8 +75,8 @@ jobs:
          git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/skybounds02/kubernetes-manifest.git
          
          cd kubernetes-manifest
-         git config --global user.email "chukwunonsosmartagbawo@gmail.com"
-         git config --global user.name "smartcloud2023"
+         git config --global user.email "philipsukonu@gmail.com"
+         git config --global user.name "Philips2005"
 
          sed -i "s+${{ vars.ECR_REPO }}/bank-frontend:.*+${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}+g" ./bank-project/frontend.yaml
 
