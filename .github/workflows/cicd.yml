@@ -63,20 +63,13 @@ jobs:
         sudo apt-get install -y git
         
     - name: Checkout repository.
-      env:
-          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
-          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
       run: |
         git clone https://github.com/skybounds02/kubernetes-manifest.git
-  
         cd kubernetes-manifest
         git config --global user.email "philipsukonu@gmail.com"
         git config --global user.name "Philips2005"
-
         sed -i "s+${{ vars.ECR_REPO }}/bank-frontend:.*+${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}+g" ./bank-project/frontend.yaml
-
         cat ./bank-project/frontend.yaml | grep -q "${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}"
-
         git add bank-project/frontend.yaml
         git commit -m "Update frontend image to version ${{ github.run_number }}"
         git push origin main
