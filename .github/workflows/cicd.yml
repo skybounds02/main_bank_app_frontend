@@ -82,7 +82,6 @@ jobs:
           git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/skybounds02/kubernetes-manifest.git && break || sleep 5
         done
         cd kubernetes-manifest
-
     - name: Update manifests
       env:
         ECR_REPO: ${{ vars.ECR_REPO }}
