@@ -56,47 +56,49 @@ jobs:
   Continues-Update_k8s_manifest:
     runs-on: Linux
     needs: Continues-Integration_build_and_push
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
     steps:
-    - name: Install required packages
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git-core
-
-    - name: Configure Git credentials
-      env:
-        GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
-        GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
-      run: |
-        git config --global credential.helper 'store --file ~/.git-credentials'
-        echo "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com" > ~/.git-credentials
-        chmod 600 ~/.git-credentials
-        git config --global user.email "philipsukonu@gmail.com"
-        git config --global user.name "philips2005"
-
-    - name: Clone repository (with retry)
-      env:
-        GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
-        GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
-      run: |
-        for i in {1..3}; do
+     - name: Clone repository (with retry)
+       env:
+         GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+         GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+       run: |
+         rm -rf kubernetes-manifest
+         for i in {1..3}; do
           git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/skybounds02/kubernetes-manifest.git && break || sleep 5
-        done
-      
-        
-    - name: Update manifests
-      env:
-        ECR_REPO: ${{ vars.ECR_REPO }}
-      run: |
-        cd kubernetes-manifest
-     
-        sed -i "s+${ECR_REPO}/bank-frontend:.*+${ECR_REPO}/bank-frontend:${{ github.run_number }}+g" ./bank-project/frontend.yaml
-        grep -q "${ECR_REPO}/bank-frontend:${{ github.run_number }}" ./bank-project/frontend.yaml
-      
-     
-        sed -i "s+${ECR_REPO}/bank-backendapi:.*+${ECR_REPO}/bank-backendapi:${{ github.run_number }}+g" ./bank-project/backendapi.yaml
-        grep -q "${ECR_REPO}/bank-backendapi:${{ github.run_number }}" ./bank-project/backendapi.yaml
+         done
 
-     
-        git add bank-project/frontend.yaml bank-project/backendapi.yaml
-        git commit -m "Update images to version ${{ github.run_number }} (frontend and backendapi)"
+     - name: find and enter k8s manifest
+       run: |
+         cd kubernetes-manifest || exit 1
+         echo "Current directory: $(pwd)"
+         ls -la bank-project/ 
+        
+
+     - name: Configure Git credentials
+       run: |
+         cd kubernetes-manifest
+         git config --global user.email "philipsukonu@gmail.com"
+         git config --global user.name "philips2005"
+    
+     - name: Update manifests
+       run: |
+         cd kubernetes-manifest
+         sed -i "s+${{ vars.ECR_REPO }}/bank-frontend:.*+${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}+g" ./bank-project/frontend.yaml
+
+     - name: Update manifests
+       run: |
+          cd kubernetes-manifest
+          cat ./bank-project/frontend.yaml | grep -q "${{ vars.ECR_REPO }}/bank-frontend:${{ github.run_number }}"
+
+     - name: pushing manifests
+       run: |
+         cd kubernetes-manifest
+         git add bank-project/backendapi.yaml
+         git commit -m "Update. backendapi image to version ${{ github.run_number }}"
+         git push origin main
+        
       
