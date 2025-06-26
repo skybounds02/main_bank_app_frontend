@@ -81,7 +81,7 @@ jobs:
         for i in {1..3}; do
           git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/skybounds02/kubernetes-manifest.git && break || sleep 5
         done
-        cd kubernetes-manifest
+      
         
     - name: Update manifests
       env:
