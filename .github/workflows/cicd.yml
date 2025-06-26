@@ -97,8 +97,8 @@ jobs:
      - name: pushing manifests
        run: |
          cd kubernetes-manifest
-         git add bank-project/backendapi.yaml
-         git commit -m "Update. backendapi image to version ${{ github.run_number }}"
+         git add bank-project/frontend.yamll
+         git commit -m "Update. frontend image to version ${{ github.run_number }}"
          git push origin main
         
       
