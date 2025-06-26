@@ -99,4 +99,4 @@ jobs:
      
         git add bank-project/frontend.yaml bank-project/backendapi.yaml
         git commit -m "Update images to version ${{ github.run_number }} (frontend and backendapi)"
-        git push origin main
+      
